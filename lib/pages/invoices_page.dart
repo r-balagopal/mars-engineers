@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
-import 'package:open_filex/open_filex.dart';
+import '../services/pdf_opener.dart';
 import 'package:share_plus/share_plus.dart';
 
 class InvoicesPage extends StatefulWidget {
@@ -31,11 +31,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Invoices'),
-      ),
-      body: Column(
+    return Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
@@ -118,7 +114,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                 title: const Text('Open PDF'),
                 onTap: () async {
                   if (invoice['pdfPath'] != null) {
-                    await OpenFilex.open(invoice['pdfPath']);
+                    await openFile(invoice['pdfPath']);
                   }
 
                   Navigator.pop(context);
@@ -197,7 +193,6 @@ class _InvoicesPageState extends State<InvoicesPage> {
                   ),
           ),
         ],
-      ),
     );
   }
 }

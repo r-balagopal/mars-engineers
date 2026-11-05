@@ -1,14 +1,22 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'database/database_helper.dart';
-import 'pages/dashboard_page.dart';
+import 'pages/home_page.dart';
 import 'pages/sites_page.dart';
-import 'pages/invoices_page.dart';
+import 'pages/money_page.dart';
 import 'pages/settings_page.dart';
+import 'utils/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
 
   await DatabaseHelper.instance.removeOrphanInvoices();
 
@@ -23,61 +31,89 @@ class MarsEngineersApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Mars Engineers',
-      theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-      ),
-      home: const HomePage(),
+      theme: buildAppTheme(),
+      home: const AppShell(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class AppShell extends StatefulWidget {
+  const AppShell({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<AppShell> createState() => _AppShellState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _AppShellState extends State<AppShell> {
   int currentIndex = 0;
 
-  final pages = const [
-  DashboardPage(),
-  SitesPage(),
-  InvoicesPage(),
-  SettingsPage(),
-];
+  static const _destinations = [
+    (Icons.home_outlined, Icons.home, 'Home'),
+    (Icons.location_city_outlined, Icons.location_city, 'Projects'),
+    (Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Money'),
+    (Icons.menu, Icons.menu, 'More'),
+  ];
+
+  // Only the selected page is built, so switching tabs reloads its data.
+  Widget _page(int i) => switch (i) {
+        0 => const HomeScreen(),
+        1 => const SitesPage(),
+        2 => const MoneyPage(),
+        _ => const SettingsPage(),
+      };
 
   @override
   Widget build(BuildContext context) {
+    final wide = MediaQuery.of(context).size.width >= 800;
+
+    if (wide) {
+      return Scaffold(
+        body: Row(
+          children: [
+            NavigationRail(
+              selectedIndex: currentIndex,
+              labelType: NavigationRailLabelType.all,
+              onDestinationSelected: (i) => setState(() => currentIndex = i),
+              leading: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 18),
+                child: Text(
+                  'MARS',
+                  style: TextStyle(
+                    color: kBrandRed,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ),
+              destinations: [
+                for (final d in _destinations)
+                  NavigationRailDestination(
+                    icon: Icon(d.$1),
+                    selectedIcon: Icon(d.$2),
+                    label: Text(d.$3),
+                  ),
+              ],
+            ),
+            const VerticalDivider(width: 1),
+            Expanded(child: _page(currentIndex)),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
-      body: pages[currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-  type: BottomNavigationBarType.fixed,
-  currentIndex: currentIndex,
-  onTap: (index) {
-    setState(() {
-      currentIndex = index;
-    });
-  },
-        items: const [
-  BottomNavigationBarItem(
-    icon: Icon(Icons.dashboard),
-    label: 'Dashboard',
-  ),
-  BottomNavigationBarItem(
-    icon: Icon(Icons.location_city),
-    label: 'Sites',
-  ),
-  BottomNavigationBarItem(
-    icon: Icon(Icons.receipt_long),
-    label: 'Invoices',
-  ),
-  BottomNavigationBarItem(
-    icon: Icon(Icons.settings),
-    label: 'Settings',
-  ),
-],
+      body: _page(currentIndex),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: currentIndex,
+        onDestinationSelected: (i) => setState(() => currentIndex = i),
+        destinations: [
+          for (final d in _destinations)
+            NavigationDestination(
+              icon: Icon(d.$1),
+              selectedIcon: Icon(d.$2),
+              label: d.$3,
+            ),
+        ],
       ),
     );
   }

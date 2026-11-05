@@ -35,7 +35,7 @@ class _SitesPageState extends State<SitesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sites'),
+        title: const Text('Projects'),
       ),
 
       body: ListView.builder(
@@ -70,7 +70,7 @@ class _SitesPageState extends State<SitesPage> {
                   return StatefulBuilder(
                     builder: (context, setDialogState) {
                       return AlertDialog(
-                        title: const Text('Edit Site'),
+                        title: const Text('Edit Project'),
 
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -78,7 +78,7 @@ class _SitesPageState extends State<SitesPage> {
                             TextField(
                               controller: nameController,
                               decoration: const InputDecoration(
-                                labelText: 'Site Name',
+                                labelText: 'Project Name',
                               ),
                             ),
 
@@ -165,7 +165,7 @@ class _SitesPageState extends State<SitesPage> {
                               showDialog(
                                 context: context,
                                 builder: (_) => AlertDialog(
-                                  title: const Text('Delete Site'),
+                                  title: const Text('Delete Project'),
                                   content: Text(
                                     'Are you sure you want to delete "${sites[index].name}"?',
                                   ),
@@ -219,7 +219,7 @@ class _SitesPageState extends State<SitesPage> {
               return StatefulBuilder(
                 builder: (context, setDialogState) {
                   return AlertDialog(
-                    title: const Text('Add Site'),
+                    title: const Text('Add Project'),
 
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -227,7 +227,7 @@ class _SitesPageState extends State<SitesPage> {
                         TextField(
                           controller: nameController,
                           decoration: const InputDecoration(
-                            labelText: 'Site Name',
+                            labelText: 'Project Name',
                           ),
                         ),
 
